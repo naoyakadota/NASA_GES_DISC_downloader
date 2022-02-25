@@ -75,7 +75,7 @@ def main():
         file_data = f.readlines()
         for line in file_data:
             downloader(line.rstrip(),args.user,args.password)
-            time.sleep(10)
+            time.sleep(2)
     print('All file downloaded')
 if __name__ == "__main__":
     main()
