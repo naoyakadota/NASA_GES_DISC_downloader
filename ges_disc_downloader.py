@@ -9,6 +9,7 @@ A python software to download data from NASA GES DISC using the download links l
 """
 
 import os
+import sys
 import time
 import argparse
 import urllib.request as rq
@@ -16,8 +17,8 @@ import base64
 from http.cookiejar import CookieJar
 
 def file_title(url): #parse filename from target url
-    if url.endswith('.pdf') == True:
-        print('The file is pdf')
+    if url.endswith('.pdf') == True: #if the file is pdf
+        #print('The file is pdf')
         file_name = url[(url.rfind('/')+1):]
         return file_name
     else:
@@ -35,22 +36,27 @@ def filepath_check(folder_name):
         os.mkdir(folder_name)
         print('new folder generated')
 def downloader(target_url,user,passwd):
-    url = target_url
-    user_pass = base64.b64encode("{0}:{1}".format(user, passwd).encode("utf-8"))
-    headers = {"Authorization" : "Basic " + user_pass.decode("utf-8")} 
-    req = rq.Request(url=url, headers=headers)
-    cj = CookieJar()
-    opener = rq.build_opener(rq.HTTPCookieProcessor(cj))
-    response = opener.open(req)
-    raw_response = response.read()
-    
-    folder_name = 'Downloaded_files'
-    filepath_check(folder_name)
-    filename = file_title(url)
-    open((folder_name +'/'+ filename), 'wb').write(raw_response)
-    response.close()
-    print(filename, 'has successfully been downloaded')
-    return
+    try:
+        url = target_url
+        user_pass = base64.b64encode("{0}:{1}".format(user, passwd).encode("utf-8"))
+        headers = {"Authorization" : "Basic " + user_pass.decode("utf-8")} 
+        req = rq.Request(url=url, headers=headers)
+        cj = CookieJar()
+        opener = rq.build_opener(rq.HTTPCookieProcessor(cj))
+        response = opener.open(req)
+        raw_response = response.read()
+        
+        folder_name = 'Downloaded_files'
+        filepath_check(folder_name)
+        filename = file_title(url)
+        open((folder_name +'/'+ filename), 'wb').write(raw_response)
+        response.close()
+        print(filename, 'has successfully been downloaded')
+        return
+    except Exception as e:
+        print('An error occured. Unable to download', target_url)
+        print(e)
+        sys.exit()
 
 def get_args():
     parser = argparse.ArgumentParser(description='input text file name, account user and account password. -h for help')
@@ -70,6 +76,6 @@ def main():
         for line in file_data:
             downloader(line.rstrip(),args.user,args.password)
             time.sleep(10)
-
+    print('All file downloaded')
 if __name__ == "__main__":
     main()
